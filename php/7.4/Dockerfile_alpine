@@ -1,6 +1,7 @@
 FROM php:7.4-fpm-alpine
 
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+# use mirror
+# RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 # install extensions dependencies for php
 RUN apk add --no-cache --virtual .build autoconf g++ gcc make \
