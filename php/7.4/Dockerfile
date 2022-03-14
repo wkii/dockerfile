@@ -1,4 +1,4 @@
-FROM php:7.4-fpm-alpine
+FROM php:7.4.28-fpm-alpine
 
 # use mirror
 # RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
