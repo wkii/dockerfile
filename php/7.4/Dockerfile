@@ -1,27 +1,29 @@
-FROM php:7.4.28-fpm-alpine
+FROM php:7.4-fpm-alpine
+# this version upgrade to alpine3.16
 
 # use mirror
 # RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 
 # install extensions dependencies for php
-RUN apk add --no-cache --virtual .build autoconf g++ gcc make \
+RUN apk upgrade --available && sync \
+    && apk add --no-cache --virtual .build autoconf g++ gcc make \
     && apk add --no-cache --virtual .bash bash curl openssh-client \
-    && apk add --no-cache --virtual .memcached libmemcached cyrus-sasl \
+    && apk add --no-cache --virtual .memcached libmemcached-dev cyrus-sasl \
     && apk add --no-cache --virtual .gd freetype libpng libjpeg-turbo \
     && apk add --no-cache --virtual .intl icu-libs \
-    && apk add --no-cache --virtual .mcrypt libmcrypt \
+    && apk add --no-cache --virtual .mcrypt libmcrypt-dev \
     && apk add --no-cache --virtual .gettext gettext \
     && apk add --no-cache --virtual .zip libzip-dev \
+    && apk add --no-cache --upgrade --virtual .decimal mpdecimal-dev \
     && apk add --no-cache --virtual .build-deps \
-        $PHPIZE_DEPS \
     # bash
         curl-dev libc-dev libtool \
     # gd
         libjpeg-turbo-dev libpng-dev freetype-dev \
     # mcrypt
-        libmcrypt-dev \
+    #    libmcrypt-dev \
     # memcached
-        libmemcached-dev cyrus-sasl-dev \
+    #    libmemcached-dev cyrus-sasl-dev \
     # mongodb
     #    openssl-dev pcre-dev \
     # oniguruma
@@ -34,35 +36,27 @@ RUN apk add --no-cache --virtual .build autoconf g++ gcc make \
         gettext-dev \
     # icu
         icu-dev \
+    && pecl install decimal && docker-php-ext-enable decimal \
+    && pecl install redis && docker-php-ext-enable redis \
+    && pecl install mcrypt-1.0.5 && docker-php-ext-enable mcrypt \
+    && pecl install memcached && docker-php-ext-enable memcached \
+
     && echo -e "\nInstall php extension..........................\n" \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j "${nproc}" \
+    && docker-php-ext-install -j$(nproc) \
         bcmath \
         exif \
         gd \
         gettext \
-        iconv \
         intl \
-        mbstring \
-        mysqli \
-        pdo \
         pdo_mysql \
         pcntl \
-        tokenizer \
         soap \
-        xml \
+        mysqli \
         zip \
         opcache \
-    && echo ==Mcrypt== \
-    && pecl install mcrypt-1.0.3 && docker-php-ext-enable mcrypt \
-    && echo "==Redis==" \
-    && pecl install -o -f redis && docker-php-ext-enable redis \
-    && rm -rf /tmp/pear \
-    && echo "==Memcached=="  \
-    && pecl install memcached && docker-php-ext-enable memcached \
-    #### && echo "==MongoDb==" \
-    #### && /bin/bash -lc "pecl install mongodb" \
-    #### && docker-php-ext-enable mongodb \    
+
+&& rm -rf /tmp/pear \
     && apk del .build .build-deps \
     #&& curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer
 && { \
@@ -73,4 +67,8 @@ RUN apk add --no-cache --virtual .build autoconf g++ gcc make \
         echo 'opcache.fast_shutdown=1'; \
         echo 'opcache.enable_cli=1'; \
     } > /usr/local/etc/php/conf.d/docker-php-ext-opcache-recommended.ini \
-    && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
+  && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini \
+  && sed -i "s/expose_php = On/expose_php = Off/" /usr/local/etc/php/php.ini \
+  && sed -i "s/memory_limit = 128M/memory_limit = 256M/" /usr/local/etc/php/php.ini \
+  && sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 10M/" /usr/local/etc/php/php.ini \
+  && sed -i "s/post_max_size = 8M/post_max_size = 10M/" /usr/local/etc/php/php.ini
