@@ -42,19 +42,20 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone  
 && sed -i "s/user nginx;/user www-data;/" /etc/nginx/nginx.conf \
 # 删除多余的加载
 && sed -i "s/include \/etc\/nginx\/sites-enabled\/*;//" /etc/nginx/nginx.conf \
-&& rm -fr /var/www/html/* && rm -rf /etc/nginx/sites-enabled/* 
-
+&& rm -fr /var/www/html/* && rm -rf /etc/nginx/sites-enabled/* \
+# 写启动文件
+&& echo "#!/bin/bash" > /opt/run.sh \
+&& echo "php-fpm -D" >> /opt/run.sh \
+&& echo "nginx -g 'daemon off;'" >> /opt/run.sh \
+&& chmod +x /opt/run.sh
 
 # 复制文件
-COPY run.sh /root/
 COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
-
-RUN chmod +x /root/run.sh
 
 EXPOSE 80
 # EXPOSE 9000
 
-CMD ["/root/run.sh"]
+CMD ["/opt/run.sh"]
 
 #使用：
 # 1、From php+nginx 的基础镜像
