@@ -50,10 +50,11 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone  
     pcntl \
     soap \
     zip \
+    # 清理空间
     && rm -rf /tmp/pear \
-    && apk del .build .build-deps
+    && apk del .build .build-deps \
     #  更新配置, # php 相关
-RUN cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini \
+    && cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini \
     && sed -i "s/expose_php = On/expose_php = Off/" /usr/local/etc/php/php.ini \
     && sed -i "s/memory_limit = 128M/memory_limit = 256M/" /usr/local/etc/php/php.ini \
     && sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 10M/" /usr/local/etc/php/php.ini \
