@@ -70,7 +70,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone  
     && sed -i "s/include \/etc\/nginx\/sites-enabled\/*;//" /etc/nginx/nginx.conf \
     && rm -fr /var/www/html/* && rm -rf /etc/nginx/sites-enabled/* \
     # 写启动文件
-    && echo "#!/bin/bash" > /opt/run.sh \
+    && echo "#!/bin/sh" > /opt/run.sh \
     && echo "php-fpm -D" >> /opt/run.sh \
     && echo "nginx -g 'daemon off;'" >> /opt/run.sh \
     && chmod +x /opt/run.sh
