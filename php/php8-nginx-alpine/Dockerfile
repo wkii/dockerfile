@@ -11,10 +11,10 @@
 # 基础镜像 php8-fpm 的 alpine 镜象
 FROM php:8-fpm-alpine
 
-# 设定时区
-ENV TZ=Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone  \
-    && sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+ENV TZ Asia/Shanghai
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
+    # 设定时区，不能删除 tzdata
+    && apk update && apk add tzdata && cp /usr/share/zoneinfo/${TZ} /etc/localtime && echo ${TZ} > /etc/timezone \
     # install extensions dependencies for php
     && apk upgrade --available && sync \
     && apk add --no-cache --virtual .build autoconf g++ gcc make \
@@ -65,10 +65,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone  
     && sed -i "s/pm.max_spare_servers = 3/pm.max_spare_servers = 5/" /usr/local/etc/php-fpm.d/www.conf \
     # nginx 相关
     && cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak \
-    && sed -i "s/user nginx;/user www-data;/" /etc/nginx/nginx.conf \
-    # 删除多余的加载
-    && sed -i "s/include \/etc\/nginx\/sites-enabled\/*;//" /etc/nginx/nginx.conf \
-    && rm -fr /var/www/html/* && rm -rf /etc/nginx/sites-enabled/* \
+    && mkdir /etc/nginx/conf.d \
     # 写启动文件
     && echo "#!/bin/sh" > /opt/run.sh \
     && echo "php-fpm -D" >> /opt/run.sh \
@@ -76,7 +73,8 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone  
     && chmod +x /opt/run.sh
 
 # 复制文件，注意是复制到 /etc/nginx/http.d 这个目录中 使用 apk-add 安装的 nginx, conf.d目录默认不存在，并且默认的nginx.conf将其incloud在http段之前
-COPY nginx/conf.d/default.conf /etc/nginx/http.d/default.conf
+COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 

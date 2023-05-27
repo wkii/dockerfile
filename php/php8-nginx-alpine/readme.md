@@ -12,12 +12,12 @@ FROM wkii/php-docker:8-fpm-alpine
 COPY index.php /var/www/html/
 ```
 
-3、使用自己的 nginx 配置，注意：如果不是覆盖 `nginx.conf`, 则复制 server 的配置文件到 `/etc/nginx/http.d` 这个目录中，为安全考虑可以覆盖掉 `default.conf`
+3、使用自己的 nginx 配置，注意：如果不是覆盖 `/etc/nginx/nginx.conf`, 则复制 server 的配置文件到 `/etc/nginx/conf.d` 这个目录中，可以覆盖掉 `default.conf`
 
-> 因为使用 apk-add 安装的 nginx, conf.d 目录默认不存在，并且默认的 nginx.conf 将其 incloud 在 http 段之前
+> 因为使用 apk-add 安装的 nginx 和 nginx 独立镜像的配置不尽相同，尽量统一使用 nginx 镜像的配置结构。
 
 ```bash
-COPY nginx/app.conf /etc/nginx/http.d/default.conf
+COPY nginx/your_app.conf /etc/nginx/conf.d/default.conf
 ```
 
 4、设置目录权限
