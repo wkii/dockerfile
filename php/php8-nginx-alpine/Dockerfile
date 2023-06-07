@@ -9,7 +9,7 @@
 # RUN chown -R  www-data:www-data /var/www/html/
 
 # 基础镜像 php8-fpm 的 alpine 镜象
-FROM php:8-fpm-alpine
+FROM --platform=$TARGETPLATFORM php:8-fpm-alpine
 
 ENV TZ Asia/Shanghai
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
@@ -78,4 +78,4 @@ COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 
-CMD ["/opt/run.sh"]
+# CMD ["/opt/run.sh"]
