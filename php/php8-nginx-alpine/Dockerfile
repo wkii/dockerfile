@@ -77,5 +77,5 @@ COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
-
-# CMD ["/opt/run.sh"]
+# 需要执行其它的可以替换 CMD
+CMD ["/opt/run.sh"]
